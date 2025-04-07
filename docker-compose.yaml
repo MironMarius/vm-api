@@ -1,0 +1,55 @@
+services:
+  vm-service:
+    build:
+      context: ./vm-service
+      dockerfile: Dockerfile
+    ports:
+      - "${VM_SERVICE_PORT:-8080}:8080"
+    env_file:
+      - .env
+
+  healthcheck-service:
+    build:
+      context: ./healthcheck-service
+      dockerfile: Dockerfile
+    environment:
+      API_URL: ${HEALTHCHECK_API_URL}
+      MACHINE_ID: ${HEALTHCHECK_MACHINE_ID}
+    ports:
+      - "${HEALTHCHECK_PORT:-7070}:7070"
+    env_file:
+      - .env
+    depends_on:
+      - http-api
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  http-api:
+    build:
+      context: ./http-api
+      dockerfile: Dockerfile
+    ports:
+      - "${HTTP_API_PORT:-9000}:9000"
+    environment:
+      - HOST=${HTTP_API_HOST:-0.0.0.0}
+      - PORT=${HTTP_API_PORT:-9000}
+      - DATABASE_URL=${POSTGRES_DOCKER_URL}
+      - VM_SERVICE_URL=${VM_SERVICE_DOCKER_URL}
+      - RUNNING_IN_DOCKER=true
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+volumes:
+  postgres_data:
