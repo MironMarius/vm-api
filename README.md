@@ -8,8 +8,7 @@ This repo includes 3 services, all written in different programming languages:
 
 ### Setup
 
-Check out this repo and make sure you have Docker installed. You can run the
-non-Python services via the `docker-compose.yaml` file by simply running
+Check out this repo and make sure you have Docker installed. You can run all services via the `docker-compose.yaml` file by simply running
 
 ```bash
 docker compose up
